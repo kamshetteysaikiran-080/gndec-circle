@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, ArrowLeft, CheckCircle2, AlertCircle, Trash2, BookOpen, FileText, RefreshCw, KeyRound } from 'lucide-react';
 
+// 👇 DYNAMIC PRODUCTION BASE URL CONFIGURATION
+const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+
 function AdminPanel({ onBack }) {
   const [facultyKey, setFacultyKey] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -24,16 +27,20 @@ function AdminPanel({ onBack }) {
   const fetchAdminRepository = async () => {
     setFetchingRepo(true);
     try {
-      const notesRes = await fetch('http://127.0.0.1:5000/api/notes');
+      // Swapped out hardcoded link for live production target
+      const notesRes = await fetch(`${baseUrl}/api/notes`);
       const notesJson = await notesRes.json();
       if (notesJson.success) setLiveNotes(notesJson.data);
 
-      const circsRes = await fetch('http://127.0.0.1:5000/api/circulars');
+      // Swapped out hardcoded link for live production target
+      const circsRes = await fetch(`${baseUrl}/api/circulars`);
       const circsJson = await circsRes.json();
       if (circsJson.success) setLiveCirculars(circsJson.data);
     } catch (err) {
       console.error("Failed to load admin repository data:", err);
-    } certify: { setFetchingRepo(false); }
+    } finally { 
+      setFetchingRepo(false); 
+    }
   };
 
   useEffect(() => {
@@ -64,7 +71,8 @@ function AdminPanel({ onBack }) {
     if (!window.confirm(`Are you absolutely sure you want to permanently delete this ${type}?`)) return;
     
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/${type}/${id}`, {
+      // Swapped out hardcoded link for live production delete routing target
+      const response = await fetch(`${baseUrl}/api/${type}/${id}`, {
         method: 'DELETE',
         headers: {
           'x-auth-key': facultyKey // Attaching secure handshake key
@@ -99,14 +107,16 @@ function AdminPanel({ onBack }) {
       formData.append('semester', noteForm.semester);
       formData.append('unitNumber', noteForm.unitNumber);
       formData.append('pdf', noteForm.pdf);
-      endpoint = 'http://127.0.0.1:5000/api/note';
+      // Swapped out hardcoded note link for live production target
+      endpoint = `${baseUrl}/api/note`;
     } else {
       if (!circularForm.pdf) { setStatus({ type: 'error', message: 'Select a PDF file.' }); setLoading(false); return; }
       formData.append('title', circularForm.title);
       formData.append('category', circularForm.category);
       formData.append('targetSemesters', circularForm.targetSemesters);
       formData.append('pdf', circularForm.pdf);
-      endpoint = 'http://127.0.0.1:5000/api/circular';
+      // Swapped out hardcoded circular link for live production target
+      endpoint = `${baseUrl}/api/circular`;
     }
 
     try {
@@ -355,7 +365,7 @@ function AdminPanel({ onBack }) {
                     <div key={circ._id} className="p-3.5 flex justify-between items-center gap-4 hover:bg-slate-850 transition-colors">
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-slate-200 truncate">{circ.title}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">Scope: {circ.targetSemesters.join(', ')} • Type: {circ.category}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">Scope: {Array.isArray(circ.targetSemesters) ? circ.targetSemesters.join(', ') : circ.targetSemesters} • Type: {circ.category}</p>
                       </div>
                       <button 
                         onClick={() => handleDelete(circ._id, 'circular')}

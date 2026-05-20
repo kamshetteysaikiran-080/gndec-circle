@@ -7,7 +7,12 @@ import AdminPanel from './AdminPanel';
 // ========================================================
 import collegeLogo from './assets/logo.png';
 import campusHero from './assets/hero.png';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+// ... any other import statements you have ...
 
+// 👇 PASTE IT EXACTLY HERE (Outside the function)
+const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
 function App() {
   const [viewMode, setViewMode] = useState('student'); 
   const [activeTab, setActiveTab] = useState('notes'); 
