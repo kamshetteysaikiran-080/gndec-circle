@@ -27,12 +27,10 @@ function AdminPanel({ onBack }) {
   const fetchAdminRepository = async () => {
     setFetchingRepo(true);
     try {
-      // Swapped out hardcoded link for live production target
       const notesRes = await fetch(`${baseUrl}/api/notes`);
       const notesJson = await notesRes.json();
       if (notesJson.success) setLiveNotes(notesJson.data);
 
-      // Swapped out hardcoded link for live production target
       const circsRes = await fetch(`${baseUrl}/api/circulars`);
       const circsJson = await circsRes.json();
       if (circsJson.success) setLiveCirculars(circsJson.data);
@@ -71,11 +69,10 @@ function AdminPanel({ onBack }) {
     if (!window.confirm(`Are you absolutely sure you want to permanently delete this ${type}?`)) return;
     
     try {
-      // Swapped out hardcoded link for live production delete routing target
       const response = await fetch(`${baseUrl}/api/${type}/${id}`, {
         method: 'DELETE',
         headers: {
-          'x-auth-key': facultyKey // Attaching secure handshake key
+          'x-auth-key': facultyKey
         }
       });
       const result = await response.json();
@@ -107,7 +104,6 @@ function AdminPanel({ onBack }) {
       formData.append('semester', noteForm.semester);
       formData.append('unitNumber', noteForm.unitNumber);
       formData.append('pdf', noteForm.pdf);
-      // Swapped out hardcoded note link for live production target
       endpoint = `${baseUrl}/api/note`;
     } else {
       if (!circularForm.pdf) { setStatus({ type: 'error', message: 'Select a PDF file.' }); setLoading(false); return; }
@@ -115,7 +111,6 @@ function AdminPanel({ onBack }) {
       formData.append('category', circularForm.category);
       formData.append('targetSemesters', circularForm.targetSemesters);
       formData.append('pdf', circularForm.pdf);
-      // Swapped out hardcoded circular link for live production target
       endpoint = `${baseUrl}/api/circular`;
     }
 
@@ -124,7 +119,7 @@ function AdminPanel({ onBack }) {
         method: 'POST',
         body: formData,
         headers: {
-          'x-auth-key': facultyKey // Attaching secure handshake key
+          'x-auth-key': facultyKey
         }
       });
       const result = await response.json();
@@ -144,7 +139,6 @@ function AdminPanel({ onBack }) {
     }
   };
 
-  // GATEWAY LOGIN INTERCEPT: Render authentication lock if not verified
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-slate-900 text-slate-100 font-sans flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

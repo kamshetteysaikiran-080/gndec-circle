@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, FileText, Search, Download, Filter, RefreshCw, Folder, ChevronDown, ChevronRight, Layers, MapPin, Calendar, Award, Compass, ShieldCheck } from 'lucide-react';
+import { BookOpen, FileText, Search, Download, Filter, RefreshCw, Folder, ChevronDown, ChevronRight, Layers, MapPin, Calendar, Compass, ShieldCheck } from 'lucide-react';
 import AdminPanel from './AdminPanel'; 
 
 // ========================================================
@@ -7,12 +7,10 @@ import AdminPanel from './AdminPanel';
 // ========================================================
 import collegeLogo from './assets/logo.png';
 import campusHero from './assets/hero.png';
-import { useState, useEffect } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
-// ... any other import statements you have ...
 
-// 👇 PASTE IT EXACTLY HERE (Outside the function)
+// 👇 DYNAMIC PRODUCTION BASE URL CONFIGURATION
 const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+
 function App() {
   const [viewMode, setViewMode] = useState('student'); 
   const [activeTab, setActiveTab] = useState('notes'); 
@@ -30,7 +28,8 @@ function App() {
     setLoading(true);
     try {
       if (activeTab === 'notes') {
-        let url = 'http://127.0.0.1:5000/api/notes'; 
+        // Updated path from hardcoded local URL to dynamic base URL
+        let url = `${baseUrl}/api/notes`; 
         const params = [];
         if (selectedDept) params.push(`dept=${selectedDept}`);
         if (selectedSem) params.push(`sem=${selectedSem}`);
@@ -40,7 +39,8 @@ function App() {
         const json = await res.json();
         if (json.success) setNotes(json.data);
       } else {
-        const res = await fetch('http://127.0.0.1:5000/api/circulars'); 
+        // Updated path from hardcoded local URL to dynamic base URL
+        const res = await fetch(`${baseUrl}/api/circulars`); 
         const json = await res.json();
         if (json.success) setCirculars(json.data);
       }
@@ -143,7 +143,7 @@ function App() {
         </div>
       </header>
 
-      {/* RE-DESIGNED INSTITUTIONAL HERO BOX */}
+      {/* INSTITUTIONAL HERO BOX */}
       <section className="max-w-5xl mx-auto px-4 pt-8">
         <div className="bg-gradient-to-r from-slate-900/80 via-indigo-950/20 to-slate-900/80 rounded-3xl p-6 md:p-8 border border-slate-800/80 backdrop-blur-md shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-3">
@@ -208,7 +208,7 @@ function App() {
                   <option value="ECE" className="bg-slate-950">ECE</option>
                   <option value="EEE" className="bg-slate-950">EEE</option>
                   <option value="ME" className="bg-slate-950">Mechanical</option>
-                  <option value="CIVIL" className="bg-slate-955">Civil</option>
+                  <option value="CIVIL" className="bg-slate-950">Civil</option>
                 </select>
               </div>
 
@@ -290,6 +290,7 @@ function App() {
                                       <a 
                                         href={note.pdfUrl}
                                         target="_blank"
+                                         Sherwood-Regular
                                         rel="noreferrer"
                                         className="h-8.5 px-3.5 bg-slate-950 hover:bg-indigo-600 border border-slate-800 hover:border-indigo-500 text-slate-300 hover:text-white rounded-xl flex items-center gap-1.5 text-xs font-bold transition-all shadow cursor-pointer"
                                       >
