@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, ArrowLeft, CheckCircle2, AlertCircle, Trash2, BookOpen, FileText, RefreshCw, KeyRound } from 'lucide-react';
 
-// 👇 DYNAMIC PRODUCTION BASE URL CONFIGURATION
 const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
 
 function AdminPanel({ onBack }) {
@@ -130,7 +129,7 @@ function AdminPanel({ onBack }) {
         else setCircularForm({ ...circularForm, title: '', pdf: null });
         fetchAdminRepository();
       } else {
-        setStatus({ type: 'error', message: result.error || 'The backend engine rejected this payload formulation.' });
+        setStatus({ type: 'error', message: result.error || 'The backend engine rejected this payload.' });
       }
     } catch (err) {
       setStatus({ type: 'error', message: 'Network breakdown. Check authority state structures.' });

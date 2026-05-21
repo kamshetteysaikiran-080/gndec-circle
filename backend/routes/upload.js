@@ -4,11 +4,8 @@ const uploadParser = cloudinaryConfig.uploadParser;
 const Circular = require('../models/Circular'); 
 const Note = require('../models/Note');         
 
-// ==========================================
-// SECURITY GATEKEEPER (MIDDLEWARE)
-// ==========================================
+// SECURITY GATEKEEPER MIDDLEWARE
 const checkFacultyAuth = (req, res, next) => {
-  // Cross-platform header reading for case-insensitive deployment environments
   const incomingKey = req.headers['x-auth-key'] || req.headers['X-Auth-Key'];
   const expectedKey = process.env.FACULTY_SECRET_KEY;
 
@@ -21,9 +18,7 @@ const checkFacultyAuth = (req, res, next) => {
   next(); 
 };
 
-// ==========================================
 // 1. ENDPOINT: UPLOAD A NEW COLLEGE CIRCULAR (PROTECTED)
-// ==========================================
 router.post('/circular', checkFacultyAuth, uploadParser.single('pdf'), async (req, res) => {
   try {
     if (!req.file) {
@@ -32,7 +27,7 @@ router.post('/circular', checkFacultyAuth, uploadParser.single('pdf'), async (re
 
     const cloudUrl = req.file.secure_url || req.file.url || req.file.path;
     if (!cloudUrl) {
-      return res.status(400).json({ success: false, error: 'Cloudinary transmission parsing failure.' });
+      return res.status(400).json({ success: false, error: 'Cloudinary storage parsing failure.' });
     }
 
     const { title, category, targetSemesters } = req.body;
@@ -40,14 +35,14 @@ router.post('/circular', checkFacultyAuth, uploadParser.single('pdf'), async (re
     if (targetSemesters) {
       semestersArray = typeof targetSemesters === 'string' ? targetSemesters.split(',') : targetSemesters;
     }
-
+    
     const newCircular = new Circular({
       title,
       category,
       targetSemesters: semestersArray,
       pdfUrl: cloudUrl
     });
-
+    
     await newCircular.save();
     res.status(201).json({ success: true, data: newCircular });
   } catch (error) {
@@ -55,9 +50,7 @@ router.post('/circular', checkFacultyAuth, uploadParser.single('pdf'), async (re
   }
 });
 
-// ==========================================
 // 2. ENDPOINT: UPLOAD STUDY NOTES (PROTECTED)
-// ==========================================
 router.post('/note', checkFacultyAuth, uploadParser.single('pdf'), async (req, res) => {
   try {
     if (!req.file) {
@@ -66,7 +59,7 @@ router.post('/note', checkFacultyAuth, uploadParser.single('pdf'), async (req, r
     
     const cloudUrl = req.file.secure_url || req.file.url || req.file.path;
     if (!cloudUrl) {
-      return res.status(400).json({ success: false, error: 'Cloudinary transmission parsing failure.' });
+      return res.status(400).json({ success: false, error: 'Cloudinary storage parsing failure.' });
     }
 
     const { subjectName, subjectCode, department, semester, unitNumber } = req.body;
@@ -76,10 +69,10 @@ router.post('/note', checkFacultyAuth, uploadParser.single('pdf'), async (req, r
       subjectCode,
       department,
       semester,
-      unitNumber: parseInt(unitNumber, 10) || 1, // Fallback layout to safely catch NaN states
+      unitNumber: parseInt(unitNumber, 10) || 1,
       pdfUrl: cloudUrl
     });
-
+    
     await newNote.save();
     res.status(201).json({ success: true, data: newNote });
   } catch (error) {
@@ -87,9 +80,7 @@ router.post('/note', checkFacultyAuth, uploadParser.single('pdf'), async (req, r
   }
 });
 
-// ==========================================
 // 3. ENDPOINT: FETCH ALL CIRCULARS FOR STUDENTS (PUBLIC)
-// ==========================================
 router.get('/circulars', async (req, res) => {
   try {
     const circulars = await Circular.find().sort({ publishedDate: -1 });
@@ -99,9 +90,7 @@ router.get('/circulars', async (req, res) => {
   }
 });
 
-// ==========================================
 // 4. ENDPOINT: FETCH NOTES WITH FILTERS (PUBLIC)
-// ==========================================
 router.get('/notes', async (req, res) => {
   try {
     const { dept, sem } = req.query;
@@ -116,13 +105,11 @@ router.get('/notes', async (req, res) => {
   }
 });
 
-// ==========================================
 // 5. ENDPOINT: DELETE STUDY NOTE (PROTECTED)
-// ==========================================
 const deleteNoteHandler = async (req, res) => {
   try {
     const note = await Note.findById(req.params.id);
-    if (!note) return res.status(404).json({ success: false, error: 'Note target not found inside database.' });
+    if (!note) return res.status(404).json({ success: false, error: 'Note target not found.' });
 
     await Note.findByIdAndDelete(req.params.id);
     res.status(200).json({ success: true, message: 'Wiped cleanly!' });
@@ -133,13 +120,11 @@ const deleteNoteHandler = async (req, res) => {
 router.delete('/note/:id', checkFacultyAuth, deleteNoteHandler);
 router.delete('/notes/:id', checkFacultyAuth, deleteNoteHandler);
 
-// ==========================================
 // 6. ENDPOINT: DELETE CIRCULAR (PROTECTED)
-// ==========================================
 const deleteCircularHandler = async (req, res) => {
   try {
     const circular = await Circular.findById(req.params.id);
-    if (!circular) return res.status(404).json({ success: false, error: 'Circular target not found inside database.' });
+    if (!circular) return res.status(404).json({ success: false, error: 'Circular target not found.' });
 
     await Circular.findByIdAndDelete(req.params.id);
     res.status(200).json({ success: true, message: 'Wiped cleanly!' });

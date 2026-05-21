@@ -2,13 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { BookOpen, FileText, Search, Download, Filter, RefreshCw, Folder, ChevronDown, ChevronRight, Layers, MapPin, Calendar, Compass, ShieldCheck } from 'lucide-react';
 import AdminPanel from './AdminPanel'; 
 
-// ========================================================
-// CORRECTED ASSET IMPORTS (Matching your exact folder structure)
-// ========================================================
 import collegeLogo from './assets/logo.png';
 import campusHero from './assets/hero.png';
 
-// 👇 DYNAMIC PRODUCTION BASE URL CONFIGURATION
 const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
 
 function App() {
@@ -28,7 +24,6 @@ function App() {
     setLoading(true);
     try {
       if (activeTab === 'notes') {
-        // Updated path from hardcoded local URL to dynamic base URL
         let url = `${baseUrl}/api/notes`; 
         const params = [];
         if (selectedDept) params.push(`dept=${selectedDept}`);
@@ -39,7 +34,6 @@ function App() {
         const json = await res.json();
         if (json.success) setNotes(json.data);
       } else {
-        // Updated path from hardcoded local URL to dynamic base URL
         const res = await fetch(`${baseUrl}/api/circulars`); 
         const json = await res.json();
         if (json.success) setCirculars(json.data);
@@ -98,11 +92,9 @@ function App() {
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans relative overflow-x-hidden bg-cover bg-center bg-no-repeat bg-fixed"
          style={{ backgroundImage: `linear-gradient(to bottom, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.96)), url(${campusHero})` }}>
       
-      {/* BRANDED HEADER */}
       <header className="bg-slate-900/70 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-50 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-4">
-            {/* OFFICIAL EMBLEM CONTAINER */}
             <div className="bg-white p-1 rounded-xl shadow-md border border-slate-200 shrink-0">
               <img src={collegeLogo} alt="GNDEC Emblem" className="h-11 w-11 object-contain" />
             </div>
@@ -143,7 +135,6 @@ function App() {
         </div>
       </header>
 
-      {/* INSTITUTIONAL HERO BOX */}
       <section className="max-w-5xl mx-auto px-4 pt-8">
         <div className="bg-gradient-to-r from-slate-900/80 via-indigo-950/20 to-slate-900/80 rounded-3xl p-6 md:p-8 border border-slate-800/80 backdrop-blur-md shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-3">
@@ -164,7 +155,6 @@ function App() {
             </p>
           </div>
           
-          {/* STATS TILES */}
           <div className="grid grid-cols-2 gap-3 w-full md:w-auto shrink-0">
             <div className="bg-slate-950/60 border border-slate-800/80 p-4 rounded-2xl min-w-[125px] text-center backdrop-blur-sm">
               <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Active Folders</p>
@@ -178,11 +168,8 @@ function App() {
         </div>
       </section>
 
-      {/* MAIN DATA FEED GRID */}
       <main className="max-w-5xl mx-auto px-4 py-8">
-        
-        {/* FILTERS TOOLBAR */}
-        <div className="bg-slate-900/50 rounded-2xl p-4 border border-slate-800/60 mb-6 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 shadow-xl backdrop-blur-md">
+        <div className="bg-gradient-to-r from-slate-900/50 to-slate-900/50 rounded-2xl p-4 border border-slate-800/60 mb-6 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 shadow-xl backdrop-blur-md">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
             <input 
@@ -228,7 +215,6 @@ function App() {
           )}
         </div>
 
-        {/* LOADING HANDLER */}
         {loading ? (
           <div className="flex flex-col justify-center items-center py-20 gap-3">
             <RefreshCw className="h-6 w-6 text-indigo-400 animate-spin" />
@@ -236,7 +222,6 @@ function App() {
           </div>
         ) : (
           <>
-            {/* GROUPED INTERACTIVE FOLDER ACCORDIONS */}
             {activeTab === 'notes' ? (
               groupedNotesResult.length === 0 ? (
                 <div className="text-center py-16 bg-slate-900/30 border border-dashed border-slate-800 rounded-3xl text-slate-500 text-sm">No folders found matching criteria.</div>
@@ -247,7 +232,6 @@ function App() {
                     return (
                       <div key={subject.subjectCode} className="bg-slate-900/50 backdrop-blur-md border border-slate-800/80 rounded-2xl overflow-hidden transition-all shadow-lg hover:border-slate-700/50">
                         
-                        {/* ACCORDION TRIGGER ROW */}
                         <div 
                           onClick={() => toggleSubject(subject.subjectCode)}
                           className="p-4.5 flex justify-between items-center cursor-pointer hover:bg-slate-900/30 select-none transition-colors"
@@ -268,7 +252,6 @@ function App() {
                           </div>
                         </div>
 
-                        {/* EXPANDED CONTENT LISTINGS */}
                         {isOpen && (
                           <div className="bg-slate-950/60 p-5 border-t border-slate-900/80 space-y-6">
                             {Object.keys(subject.units).sort().map((unitNum) => (
@@ -290,7 +273,6 @@ function App() {
                                       <a 
                                         href={note.pdfUrl}
                                         target="_blank"
-                                         Sherwood-Regular
                                         rel="noreferrer"
                                         className="h-8.5 px-3.5 bg-slate-950 hover:bg-indigo-600 border border-slate-800 hover:border-indigo-500 text-slate-300 hover:text-white rounded-xl flex items-center gap-1.5 text-xs font-bold transition-all shadow cursor-pointer"
                                       >
@@ -311,7 +293,6 @@ function App() {
                 </div>
               )
             ) : (
-              /* BULLETIN TIMELINE NOTICE ENTRIES */
               filteredCirculars.length === 0 ? (
                 <div className="text-center py-16 bg-slate-900/30 border border-dashed border-slate-800 rounded-3xl text-slate-500 text-sm">No office board announcements found.</div>
               ) : (
@@ -352,7 +333,6 @@ function App() {
         )}
       </main>
 
-      {/* FOOTER */}
       <footer className="max-w-5xl mx-auto px-4 pb-12 mt-12 text-center border-t border-slate-900 pt-6">
         <p className="text-xs text-slate-600 font-medium">Guru Nanak Dev Engineering College • Mailoor Road, Bidar, Karnataka 585403</p>
         <p className="text-[11px] text-slate-700 mt-1 font-mono">GNDEC Circle Academic Engine v2.5</p>
