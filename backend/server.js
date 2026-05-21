@@ -10,13 +10,14 @@ const app = express();
 // Middleware Configuration
 app.use(express.json());
 
-// Explicitly configure CORS to trust all variants of local application loopbacks
+// ALLOW BOTH LOCAL DEVELOPMENT AND YOUR LIVE NETLIFY APP FRONTEND
 app.use(cors({
   origin: [
     "http://localhost:5173", 
     "http://localhost:5174",
     "http://127.0.0.1:5173",
-    "http://127.0.0.1:5174"
+    "http://127.0.0.1:5174",
+    "https://celebrated-cactus-f30efe.netlify.app" // 👈 Added your production domain asset link!
   ],
   credentials: true
 }));
@@ -39,7 +40,6 @@ const mongoConnectionUri = process.env.MONGO_URI || fallbackMongoUri;
 mongoose.connect(mongoConnectionUri)
   .then(() => {
     console.log('Connected to GNDEC Circle Database successfully!');
-    // Binding to "0.0.0.0" forces Windows network adapters to bridge IPv4 and IPv6 traffic flawlessly
     app.listen(PORT, "0.0.0.0", () => console.log(`Backend server running smoothly on port ${PORT}`));
   })
   .catch((err) => {
