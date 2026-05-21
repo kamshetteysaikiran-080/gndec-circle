@@ -7,21 +7,21 @@ const uploadRoutes = require('./routes/upload');
 
 const app = express();
 
-// Middleware Configuration
+// ==========================================
+// MIDDLEWARE CONFIGURATION
+// ==========================================
 app.use(express.json());
 
-// ALLOW BOTH LOCAL DEVELOPMENT AND YOUR LIVE NETLIFY APP FRONTEND
+// Bulletproof CORS Configuration to prevent preflight options blocks in cloud deploys
 app.use(cors({
-  origin: [
-    "http://localhost:5173", 
-    "http://localhost:5174",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:5174",
-    "https://celebrated-cactus-f30efe.netlify.app" // 👈 Added your production domain asset link!
-  ],
-  credentials: true
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'x-auth-key', 'X-Auth-Key']
 }));
 
+// ==========================================
+// ROUTE MOUNTING
+// ==========================================
 // Server health check route
 app.get('/', (req, res) => {
   res.send('GNDEC Circle Backend Engine is Running Live!');
@@ -30,7 +30,9 @@ app.get('/', (req, res) => {
 // Mount our API paths
 app.use('/api', uploadRoutes);
 
-// Database Connection and Server Start
+// ==========================================
+// DATABASE & SERVER INITIALIZATION
+// ==========================================
 const PORT = process.env.PORT || 5000;
 
 // Temporary backup URI to prevent crashes before setting up Atlas database
@@ -40,6 +42,7 @@ const mongoConnectionUri = process.env.MONGO_URI || fallbackMongoUri;
 mongoose.connect(mongoConnectionUri)
   .then(() => {
     console.log('Connected to GNDEC Circle Database successfully!');
+    // Binding to "0.0.0.0" allows the container service to bind across cloud hosting environments
     app.listen(PORT, "0.0.0.0", () => console.log(`Backend server running smoothly on port ${PORT}`));
   })
   .catch((err) => {
