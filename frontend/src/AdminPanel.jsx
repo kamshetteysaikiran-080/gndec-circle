@@ -87,7 +87,7 @@ function AdminPanel({ onBack }) {
     }
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setStatus({ type: '', message: '' });
@@ -95,6 +95,9 @@ function AdminPanel({ onBack }) {
     const formData = new FormData();
     let endpoint = '';
     
+    // Clean trailing slashes dynamically to avoid routing bugs
+    const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+
     if (uploadType === 'note') {
       if (!noteForm.pdf) { setStatus({ type: 'error', message: 'Select a PDF file.' }); setLoading(false); return; }
       formData.append('subjectName', noteForm.subjectName);
@@ -103,14 +106,14 @@ function AdminPanel({ onBack }) {
       formData.append('semester', noteForm.semester);
       formData.append('unitNumber', noteForm.unitNumber);
       formData.append('pdf', noteForm.pdf);
-      endpoint = `${baseUrl}/api/note`;
+      endpoint = `${cleanBaseUrl}/api/note`;
     } else {
       if (!circularForm.pdf) { setStatus({ type: 'error', message: 'Select a PDF file.' }); setLoading(false); return; }
       formData.append('title', circularForm.title);
       formData.append('category', circularForm.category);
       formData.append('targetSemesters', circularForm.targetSemesters);
       formData.append('pdf', circularForm.pdf);
-      endpoint = `${baseUrl}/api/circular`;
+      endpoint = `${cleanBaseUrl}/api/circular`;
     }
 
     try {
@@ -119,6 +122,7 @@ function AdminPanel({ onBack }) {
         body: formData,
         headers: {
           'x-auth-key': facultyKey
+          // NOTE: Do NOT set Content-Type here! The browser must set boundary markers for multipart files.
         }
       });
       const result = await response.json();
@@ -132,6 +136,7 @@ function AdminPanel({ onBack }) {
         setStatus({ type: 'error', message: result.error || 'The backend engine rejected this payload.' });
       }
     } catch (err) {
+      console.error("Transmission error details:", err);
       setStatus({ type: 'error', message: 'Network breakdown. Check authority state structures.' });
     } finally {
       setLoading(false);

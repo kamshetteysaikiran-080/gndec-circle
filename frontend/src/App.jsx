@@ -23,8 +23,9 @@ function App() {
   const fetchData = async () => {
     setLoading(true);
     try {
+      const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
       if (activeTab === 'notes') {
-        let url = `${baseUrl}/api/notes`; 
+        let url = `${cleanBaseUrl}/api/notes`; 
         const params = [];
         if (selectedDept) params.push(`dept=${selectedDept}`);
         if (selectedSem) params.push(`sem=${selectedSem}`);
@@ -34,7 +35,7 @@ function App() {
         const json = await res.json();
         if (json.success) setNotes(json.data);
       } else {
-        const res = await fetch(`${baseUrl}/api/circulars`); 
+        const res = await fetch(`${cleanBaseUrl}/api/circulars`); 
         const json = await res.json();
         if (json.success) setCirculars(json.data);
       }
