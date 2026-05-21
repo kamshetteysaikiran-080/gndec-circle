@@ -46,10 +46,15 @@ function AdminPanel({ onBack }) {
     }
   }, [isAuthorized]);
 
-  const handleKeyVerification = (e) => {
+ const handleKeyVerification = (e) => {
     e.preventDefault();
     if (facultyKey.trim() === "") {
       setStatus({ type: 'error', message: 'Passcode cannot be blank.' });
+      return;
+    }
+    // Updated verification token to match your new passcode
+    if (facultyKey !== "23CS080") {
+      setStatus({ type: 'error', message: 'Invalid institutional access key.' });
       return;
     }
     setIsAuthorized(true);
