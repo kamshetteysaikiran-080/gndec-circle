@@ -8,7 +8,8 @@ const Note = require('../models/Note');
 // SECURITY GATEKEEPER (MIDDLEWARE)
 // ==========================================
 const checkFacultyAuth = (req, res, next) => {
-  const incomingKey = req.headers['x-auth-key'];
+  // Cross-platform header reading for case-insensitive deployment environments
+  const incomingKey = req.headers['x-auth-key'] || req.headers['X-Auth-Key'];
   const expectedKey = process.env.FACULTY_SECRET_KEY;
 
   if (!incomingKey || incomingKey !== expectedKey) {
@@ -17,7 +18,7 @@ const checkFacultyAuth = (req, res, next) => {
       error: 'CRITICAL SECURITY BLOCK: You are unauthorized to modify GNDEC digital assets.' 
     });
   }
-  next(); // Key is correct, pass request forward safely
+  next(); 
 };
 
 // ==========================================
@@ -31,7 +32,7 @@ router.post('/circular', checkFacultyAuth, uploadParser.single('pdf'), async (re
 
     const cloudUrl = req.file.secure_url || req.file.url || req.file.path;
     if (!cloudUrl) {
-      return res.status(400).json({ success: false, error: 'Cloudinary failure.' });
+      return res.status(400).json({ success: false, error: 'Cloudinary transmission parsing failure.' });
     }
 
     const { title, category, targetSemesters } = req.body;
@@ -39,12 +40,14 @@ router.post('/circular', checkFacultyAuth, uploadParser.single('pdf'), async (re
     if (targetSemesters) {
       semestersArray = typeof targetSemesters === 'string' ? targetSemesters.split(',') : targetSemesters;
     }
+
     const newCircular = new Circular({
       title,
       category,
       targetSemesters: semestersArray,
       pdfUrl: cloudUrl
     });
+
     await newCircular.save();
     res.status(201).json({ success: true, data: newCircular });
   } catch (error) {
@@ -62,6 +65,10 @@ router.post('/note', checkFacultyAuth, uploadParser.single('pdf'), async (req, r
     }
     
     const cloudUrl = req.file.secure_url || req.file.url || req.file.path;
+    if (!cloudUrl) {
+      return res.status(400).json({ success: false, error: 'Cloudinary transmission parsing failure.' });
+    }
+
     const { subjectName, subjectCode, department, semester, unitNumber } = req.body;
     
     const newNote = new Note({
@@ -69,9 +76,10 @@ router.post('/note', checkFacultyAuth, uploadParser.single('pdf'), async (req, r
       subjectCode,
       department,
       semester,
-      unitNumber: parseInt(unitNumber, 10),
+      unitNumber: parseInt(unitNumber, 10) || 1, // Fallback layout to safely catch NaN states
       pdfUrl: cloudUrl
     });
+
     await newNote.save();
     res.status(201).json({ success: true, data: newNote });
   } catch (error) {
@@ -114,7 +122,7 @@ router.get('/notes', async (req, res) => {
 const deleteNoteHandler = async (req, res) => {
   try {
     const note = await Note.findById(req.params.id);
-    if (!note) return res.status(404).json({ success: false, error: 'Not found' });
+    if (!note) return res.status(404).json({ success: false, error: 'Note target not found inside database.' });
 
     await Note.findByIdAndDelete(req.params.id);
     res.status(200).json({ success: true, message: 'Wiped cleanly!' });
@@ -131,7 +139,7 @@ router.delete('/notes/:id', checkFacultyAuth, deleteNoteHandler);
 const deleteCircularHandler = async (req, res) => {
   try {
     const circular = await Circular.findById(req.params.id);
-    if (!circular) return res.status(404).json({ success: false, error: 'Not found' });
+    if (!circular) return res.status(404).json({ success: false, error: 'Circular target not found inside database.' });
 
     await Circular.findByIdAndDelete(req.params.id);
     res.status(200).json({ success: true, message: 'Wiped cleanly!' });
