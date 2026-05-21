@@ -18,16 +18,24 @@ const checkFacultyAuth = (req, res, next) => {
   next(); 
 };
 
+// ==========================================
 // 1. ENDPOINT: UPLOAD A NEW COLLEGE CIRCULAR (PROTECTED)
+// ==========================================
 router.post('/circular', checkFacultyAuth, uploadParser.single('pdf'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, error: 'File upload failed. No metadata captured.' });
     }
 
-    const cloudUrl = req.file.secure_url || req.file.url || req.file.path;
+    // Direct upload using official Cloudinary SDK wrapper bypasses the constructor bug
+    const uploadResult = await cloudinaryConfig.cloudinary.uploader.upload(req.file.path, {
+      folder: 'gndec_circle_assets',
+      resource_type: 'raw'
+    });
+
+    const cloudUrl = uploadResult.secure_url || uploadResult.url;
     if (!cloudUrl) {
-      return res.status(400).json({ success: false, error: 'Cloudinary storage parsing failure.' });
+      return res.status(400).json({ success: false, error: 'Cloudinary transmission parsing failure.' });
     }
 
     const { title, category, targetSemesters } = req.body;
@@ -35,14 +43,14 @@ router.post('/circular', checkFacultyAuth, uploadParser.single('pdf'), async (re
     if (targetSemesters) {
       semestersArray = typeof targetSemesters === 'string' ? targetSemesters.split(',') : targetSemesters;
     }
-    
+
     const newCircular = new Circular({
       title,
       category,
       targetSemesters: semestersArray,
       pdfUrl: cloudUrl
     });
-    
+
     await newCircular.save();
     res.status(201).json({ success: true, data: newCircular });
   } catch (error) {
@@ -50,16 +58,24 @@ router.post('/circular', checkFacultyAuth, uploadParser.single('pdf'), async (re
   }
 });
 
+// ==========================================
 // 2. ENDPOINT: UPLOAD STUDY NOTES (PROTECTED)
+// ==========================================
 router.post('/note', checkFacultyAuth, uploadParser.single('pdf'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, error: 'File upload failed. No metadata captured.' });
     }
     
-    const cloudUrl = req.file.secure_url || req.file.url || req.file.path;
+    // Direct upload using official Cloudinary SDK wrapper bypasses the constructor bug
+    const uploadResult = await cloudinaryConfig.cloudinary.uploader.upload(req.file.path, {
+      folder: 'gndec_circle_assets',
+      resource_type: 'raw'
+    });
+
+    const cloudUrl = uploadResult.secure_url || uploadResult.url;
     if (!cloudUrl) {
-      return res.status(400).json({ success: false, error: 'Cloudinary storage parsing failure.' });
+      return res.status(400).json({ success: false, error: 'Cloudinary transmission parsing failure.' });
     }
 
     const { subjectName, subjectCode, department, semester, unitNumber } = req.body;
@@ -72,7 +88,7 @@ router.post('/note', checkFacultyAuth, uploadParser.single('pdf'), async (req, r
       unitNumber: parseInt(unitNumber, 10) || 1,
       pdfUrl: cloudUrl
     });
-    
+
     await newNote.save();
     res.status(201).json({ success: true, data: newNote });
   } catch (error) {
