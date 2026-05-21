@@ -1,4 +1,5 @@
 const cloudinary = require('cloudinary').v2;
+// 👇 CHANGE THIS LINE TO USE CURLY BRACES { CloudinaryStorage }
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
 
@@ -15,7 +16,7 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'gndec_circle_assets',
     allowed_formats: ['pdf'],
-    resource_type: 'raw' // Forces Cloudinary to accept raw documents like PDFs cleanly
+    resource_type: 'raw' // Forces Cloudinary to accept documents cleanly
   }
 });
 
